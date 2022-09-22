@@ -8,11 +8,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Shop {
-    private List<Car> cars = new ArrayList<>();
-    private int carNumForSellPlan;
-    private AtomicInteger soldCar = new AtomicInteger(0);
-    private Lock lock = new ReentrantLock();
-    private Condition condition = lock.newCondition();
+    private final List<Car> cars = new ArrayList<>();
+    private final int carNumForSellPlan;
+    private final AtomicInteger soldCar = new AtomicInteger(0);
+    private final Lock lock = new ReentrantLock();
+    private final Condition condition = lock.newCondition();
 
     public Shop(int carNumForSellPlan) {
         this.carNumForSellPlan = carNumForSellPlan;
@@ -30,8 +30,9 @@ public class Shop {
             System.out.println(Thread.currentThread().getName() + " drove on new car");
             System.out.println("Sold " + soldCar.incrementAndGet() + " cars");
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            System.out.println(Thread.currentThread().getName() + " finished shopping");
+            return null;
         } finally {
             lock.unlock();
         }
@@ -53,7 +54,7 @@ public class Shop {
     }
 
     public boolean isFinishedSellPlan() {
-        return soldCar.get() == carNumForSellPlan;
+        return soldCar.get() >= carNumForSellPlan;
     }
 }
 
